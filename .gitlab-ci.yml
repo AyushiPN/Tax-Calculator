@@ -1,0 +1,50 @@
+stages:
+  - install
+  - build
+  - deploy
+
+variables:
+  DOCKER_IMAGE_BACKEND: $CI_REGISTRY_IMAGE/backend:latest
+  DOCKER_IMAGE_FRONTEND: $CI_REGISTRY_IMAGE/frontend:latest
+
+before_script:
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+install_backend:
+  stage: install
+  script:
+    - cd backend
+    - npm install
+
+install_frontend:
+  stage: install
+  script:
+    - cd frontend
+    - npm install
+
+build_backend:
+  stage: build
+  script:
+    - cd backend
+    - docker build -t $DOCKER_IMAGE_BACKEND .
+    - docker push $DOCKER_IMAGE_BACKEND
+
+build_frontend:
+  stage: build
+  script:
+    - cd frontend
+    - cp .npmrc.template .npmrc
+    - echo "//artifactory-url/:_authToken=$ARTIFACTORY_TOKEN" >> .npmrc
+    - npm install
+    - docker build -t $DOCKER_IMAGE_FRONTEND .
+    - docker push $DOCKER_IMAGE_FRONTEND
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying to AWS ECR"
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URI
+    - docker tag $DOCKER_IMAGE_BACKEND $ECR_REPO_URI/backend:latest
+    - docker push $ECR_REPO_URI/backend:latest
+    - docker tag $DOCKER_IMAGE_FRONTEND $ECR_REPO_URI/frontend:latest
+    - docker push $ECR_REPO_URI/frontend:latest
