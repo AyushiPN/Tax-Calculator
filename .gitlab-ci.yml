@@ -3,6 +3,9 @@ stages:
   - build
   - deploy
 
+image: docker:stable
+
+
 variables:
   DOCKER_IMAGE_BACKEND: $CI_REGISTRY_IMAGE/backend:latest
   DOCKER_IMAGE_FRONTEND: $CI_REGISTRY_IMAGE/frontend:latest
