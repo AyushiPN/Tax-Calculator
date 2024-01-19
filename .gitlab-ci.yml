@@ -48,7 +48,7 @@ deploy:
   script:
     - echo "Deploying to AWS ECR"
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URI
-    - docker tag $DOCKER_IMAGE_BACKEND $ECR_REPO_URI/backend:latest
-    - docker push $ECR_REPO_URI/backend:latest
-    - docker tag $DOCKER_IMAGE_FRONTEND $ECR_REPO_URI/frontend:latest
-    - docker push $ECR_REPO_URI/frontend:latest
+    - docker tag $DOCKER_IMAGE_BACKEND $ECR_REPO/backend:latest
+    - docker push $ECR_REPO/backend:latest
+    - docker tag $DOCKER_IMAGE_FRONTEND $ECR_REPO/frontend:latest
+    - docker push $ECR_REPO/frontend:latest
