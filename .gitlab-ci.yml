@@ -8,6 +8,9 @@ variables:
   DOCKER_IMAGE_FRONTEND: $CI_REGISTRY_IMAGE/frontend
 
 before_script:
+  - echo "Installing AWS CLI"
+  - apt-get update -qy
+  - apt-get install -y awscli
   - echo "Logging in to AWS ECR"
   - echo $AWS_SECRET_ACCESS_KEY | aws configure set aws_secret_access_key --stdin
   - echo $AWS_ACCESS_KEY_ID | aws configure set aws_access_key_id --stdin
