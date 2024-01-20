@@ -1,15 +1,14 @@
 FROM node:18-alpine
+ARG VP_ARTIFACTORY_TOKEN
 
-WORKDIR /app
+WORKDIR /usr/src
 
 COPY package*.json ./
 COPY .npmrc ./
 
 
 RUN npm install
-
-
-COPY . .
+ENV VP_ARTIFACTORY_TOKEN=$VP_ARTIFACTORY_TOKEN
 
 
 EXPOSE 5173
