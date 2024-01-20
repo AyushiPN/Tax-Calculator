@@ -1,54 +1,48 @@
 stages:
-  - install
-  - build
+  - build_backend
+  - build_frontend
   - deploy
 
-image: docker:stable
-
-
 variables:
-  DOCKER_IMAGE_BACKEND: $CI_REGISTRY_IMAGE/backend:latest
-  DOCKER_IMAGE_FRONTEND: $CI_REGISTRY_IMAGE/frontend:latest
+  AWS_DEFAULT_REGION: "eu-west-1"  
+  BACKEND_IMAGE: "tax-calc-backend"
+  FRONTEND_IMAGE: "tax-calc-frontend"
+  ECR_REPO_URL: "732656525333.dkr.ecr.eu-west-1.amazonaws.com"
 
 before_script:
-  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
-
-
-install_backend:
-  stage: install
-  script:
-    - cd backend
-    - npm install
-
-install_frontend:
-  stage: install
-  script:
-    - cd frontend
-    - npm install
+  - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+  - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 
 build_backend:
-  stage: build
+  stage: build_backend
   script:
     - cd backend
-    - docker build -t $DOCKER_IMAGE_BACKEND .
-    - docker push $DOCKER_IMAGE_BACKEND
+    - echo "Building backend Docker image"
+    - docker build -t $BACKEND_IMAGE .
+    - echo "Tagging backend Docker image"
+    - docker tag $BACKEND_IMAGE:latest $ECR_REPO_URL/$BACKEND_IMAGE:latest
 
 build_frontend:
-  stage: build
+  stage: build_frontend
   script:
     - cd frontend
-    - cp .npmrc.template .npmrc
-    - echo "//artifactory-url/:_authToken=$ARTIFACTORY_TOKEN" >> .npmrc
-    - npm install
-    - docker build -t $DOCKER_IMAGE_FRONTEND .
-    - docker push $DOCKER_IMAGE_FRONTEND
+    - echo "Building frontend Docker image"
+    - docker build -t $FRONTEND_IMAGE .
+    - echo "Tagging frontend Docker image"
+    - docker tag $FRONTEND_IMAGE:latest $ECR_REPO_URL/$FRONTEND_IMAGE:latest
 
-deploy:
+deploy_backend:
   stage: deploy
   script:
-    - echo "Deploying to AWS ECR"
-    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URI
-    - docker tag $DOCKER_IMAGE_BACKEND $ECR_REPO/backend:latest
-    - docker push $ECR_REPO/backend:latest
-    - docker tag $DOCKER_IMAGE_FRONTEND $ECR_REPO/frontend:latest
-    - docker push $ECR_REPO/frontend:latest
+    - echo "Logging in to AWS ECR"
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
+    - echo "Pushing backend Docker image to ECR"
+    - docker push $ECR_REPO_URL/$BACKEND_IMAGE:latest
+
+deploy_frontend:
+  stage: deploy
+  script:
+    - echo "Logging in to AWS ECR"
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
+    - echo "Pushing frontend Docker image to ECR"
+    - docker push $ECR_REPO_URL/$FRONTEND_IMAGE:latest
