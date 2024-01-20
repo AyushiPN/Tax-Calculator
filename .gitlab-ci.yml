@@ -1,4 +1,5 @@
 image: node:18-alpine
+
 services:
   - docker:dind
 
@@ -12,15 +13,13 @@ variables:
   DOCKER_IMAGE_FRONTEND: $CI_REGISTRY_IMAGE/frontend
 
 before_script:
-  - apk add git
-  - apk add openssh-client
+  - apk add --no-cache git openssh-client
   - eval $(ssh-agent -s)
   - echo "${SSH_PRIVATE_KEY}" | ssh-add -
   - mkdir -p ~/.ssh
   - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   - echo "Installing Docker and AWS CLI"
-  - apt-get update -qy
-  - apt-get install -y docker.io awscli
+  - apk add --no-cache docker-cli aws-cli
   - echo "Logging in to AWS ECR"
   - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
   - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
