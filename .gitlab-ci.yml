@@ -36,19 +36,12 @@ before_script:
     - docker build -t $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA .
     - docker push $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA
 
-build:
-  stage: build
-  script:
-    - *build_backend
-    - *build_frontend
 
 deploy-stage:
   when: manual
   stage: deploy
   needs: [build]
   script:
-    - *build_backend
-    - *build_frontend
     - export TF_VAR_vp_artifactory_token=$ARTIFACTORY_TOKEN
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
@@ -59,8 +52,6 @@ deploy-staging:
   stage: deploy
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - *build_backend
-    - *build_frontend
     - export TF_VAR_vp_artifactory_token=$ARTIFACTORY_TOKEN
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
     - docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA $ECR_REPO/backend:$CI_COMMIT_SHA
@@ -75,8 +66,6 @@ deploy-prod:
     - main
   needs: [build]
   script:
-    - *build_backend
-    - *build_frontend
     - export TF_VAR_vp_artifactory_token=$ARTIFACTORY_TOKEN
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ECR_REGISTRY
     - docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA $ECR_REPO/backend:$CI_COMMIT_SHA
