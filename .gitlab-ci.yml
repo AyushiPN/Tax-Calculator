@@ -37,8 +37,8 @@ build_frontend:
   stage: build_frontend
   script:
     - echo "Building frontend Docker image"
+    - cp frontend/.npmrc frontend/
     - cd frontend
-    - cp ../.npmrc .
     - docker build -t $DOCKER_IMAGE_FRONTEND .
 
 push_to_ecr:
