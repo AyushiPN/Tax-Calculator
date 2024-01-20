@@ -1,76 +1,40 @@
-image: node:18-alpine
-services:
-  - docker:dind
+stages:
+  - build_backend
+  - build_frontend
+  - push_to_ecr
 
 variables:
-  DOCKER_HOST: tcp://docker:2375/
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ''
-
-stages:
-  - build
-  - deploy
+  DOCKER_IMAGE_BACKEND: $CI_REGISTRY_IMAGE/backend
+  DOCKER_IMAGE_FRONTEND: $CI_REGISTRY_IMAGE/frontend
 
 before_script:
-  - apk add git
-  - apk add openssh-client
-  - eval $(ssh-agent -s)
-  - echo "${SSH_PRIVATE_KEY}" | ssh-add -
-  - mkdir -p ~/.ssh
-  - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+  - echo "Logging in to AWS ECR"
+  - echo $AWS_SECRET_ACCESS_KEY | aws configure set aws_secret_access_key --stdin
+  - echo $AWS_ACCESS_KEY_ID | aws configure set aws_access_key_id --stdin
+  - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
 
-.build_backend: &build_backend
+build_backend:
+  stage: build_backend
   script:
+    - echo "Building backend Docker image"
     - cd backend
-    - npm i @nestjs/cli
-    - npm install
-    - npm run build
-    - docker build -t $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA .
-    - docker push $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA
+    - docker build -t $DOCKER_IMAGE_BACKEND .
+    - docker tag $DOCKER_IMAGE_BACKEND:latest $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
 
-.build_frontend: &build_frontend
+build_frontend:
+  stage: build_frontend
   script:
+    - echo "Building frontend Docker image"
     - cd frontend
-    - npm install
-    - npm run build
-    - docker build -t $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA .
-    - docker push $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA
+    - docker build -t $DOCKER_IMAGE_FRONTEND .
+    - docker tag $DOCKER_IMAGE_FRONTEND:latest $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
 
-
-deploy-stage:
-  when: manual
-  stage: deploy
-  needs: [build]
+push_to_ecr:
+  stage: push_to_ecr
   script:
-    - export TF_VAR_vp_artifactory_token=$ARTIFACTORY_TOKEN
-    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-    - cd deployment
-    - docker-compose -f docker-compose.staging.yml up -d
+    - echo "Pushing backend Docker image to ECR"
+    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
 
-deploy-staging:
-  stage: deploy
-  script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - export TF_VAR_vp_artifactory_token=$ARTIFACTORY_TOKEN
-    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
-    - docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA $ECR_REPO/backend:$CI_COMMIT_SHA
-    - docker tag $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA $ECR_REPO/frontend:$CI_COMMIT_SHA
-    - docker push $ECR_REPO/backend:$CI_COMMIT_SHA
-    - docker push $ECR_REPO/frontend:$CI_COMMIT_SHA
+    - echo "Pushing frontend Docker image to ECR"
+    - docker push $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
 
-deploy-prod:
-  when: manual
-  stage: deploy
-  only:
-    - main
-  needs: [build]
-  script:
-    - export TF_VAR_vp_artifactory_token=$ARTIFACTORY_TOKEN
-    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
-    - docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA $ECR_REPO/backend:$CI_COMMIT_SHA
-    - docker tag $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA $ECR_REPO/frontend:$CI_COMMIT_SHA
-    - docker push $ECR_REPO/backend:$CI_COMMIT_SHA
-    - docker push $ECR_REPO/frontend:$CI_COMMIT_SHA
-    - cd deployment
-    
