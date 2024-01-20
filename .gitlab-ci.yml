@@ -3,6 +3,11 @@ stages:
   - build_frontend
   - deploy
 
+services:
+  - docker:dind
+
+
+
 variables:
   AWS_DEFAULT_REGION: "eu-west-1"  
   BACKEND_IMAGE: "tax-calc-backend"
