@@ -8,9 +8,9 @@ variables:
   DOCKER_IMAGE_FRONTEND: $CI_REGISTRY_IMAGE/frontend
 
 before_script:
-  - echo "Installing AWS CLI"
+  - echo "Installing Docker and AWS CLI"
   - apt-get update -qy
-  - apt-get install -y awscli
+  - apt-get install -y docker.io awscli
   - echo "Logging in to AWS ECR"
   - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
   - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
