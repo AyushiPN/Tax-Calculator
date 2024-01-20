@@ -12,8 +12,9 @@ before_script:
   - apt-get update -qy
   - apt-get install -y awscli
   - echo "Logging in to AWS ECR"
-  - echo $AWS_SECRET_ACCESS_KEY | aws configure set aws_secret_access_key --stdin
-  - echo $AWS_ACCESS_KEY_ID | aws configure set aws_access_key_id --stdin
+  - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+  - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+  - aws configure set region $AWS_DEFAULT_REGION
   - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
 
 build_backend:
@@ -40,4 +41,3 @@ push_to_ecr:
 
     - echo "Pushing frontend Docker image to ECR"
     - docker push $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
-
