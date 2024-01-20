@@ -1,4 +1,4 @@
-image: node:18-alpine
+image: docker:latest
 
 services:
   - docker:dind
@@ -18,8 +18,8 @@ before_script:
   - echo "${SSH_PRIVATE_KEY}" | ssh-add -
   - mkdir -p ~/.ssh
   - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-  - echo "Installing Docker and AWS CLI"
-  - apk add --no-cache docker-cli aws-cli
+  - echo "Installing AWS CLI"
+  - apk add --no-cache aws-cli
   - echo "Logging in to AWS ECR"
   - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
   - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
@@ -32,7 +32,6 @@ build_backend:
     - echo "Building backend Docker image"
     - cd backend
     - docker build -t $DOCKER_IMAGE_BACKEND .
-    - docker tag $DOCKER_IMAGE_BACKEND:latest $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
 
 build_frontend:
   stage: build_frontend
@@ -40,13 +39,14 @@ build_frontend:
     - echo "Building frontend Docker image"
     - cd frontend
     - docker build -t $DOCKER_IMAGE_FRONTEND .
-    - docker tag $DOCKER_IMAGE_FRONTEND:latest $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
 
 push_to_ecr:
   stage: push_to_ecr
   script:
     - echo "Pushing backend Docker image to ECR"
+    - docker tag $DOCKER_IMAGE_BACKEND:latest $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
     - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
 
     - echo "Pushing frontend Docker image to ECR"
+    - docker tag $DOCKER_IMAGE_FRONTEND:latest $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
     - docker push $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
