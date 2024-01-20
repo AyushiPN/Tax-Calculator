@@ -1,53 +1,87 @@
-stages:
-  - build_backend
-  - build_frontend
-  - deploy
-
+image: node:18-alpine
 services:
   - docker:dind
 
-
-
 variables:
-  AWS_DEFAULT_REGION: "eu-west-1"  
-  BACKEND_IMAGE: "tax-calc-backend"
-  FRONTEND_IMAGE: "tax-calc-frontend"
-  ECR_REPO_URL: "732656525333.dkr.ecr.eu-west-1.amazonaws.com"
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ''
+
+stages:
+  - build
+  - deploy
 
 before_script:
-  - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-  - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  - apk add git
+  - apk add openssh-client
+  - eval $(ssh-agent -s)
+  - echo "${SSH_PRIVATE_KEY}" | ssh-add -
+  - mkdir -p ~/.ssh
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
-build_backend:
-  stage: build_backend
+.build_backend: &build_backend
   script:
     - cd backend
-    - echo "Building backend Docker image"
-    - docker build -t $BACKEND_IMAGE .
-    - echo "Tagging backend Docker image"
-    - docker tag $BACKEND_IMAGE:latest $ECR_REPO_URL/$BACKEND_IMAGE:latest
+    - npm i @nestjs/cli
+    - npm install
+    - npm run build
+    - docker build -t $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA
 
-build_frontend:
-  stage: build_frontend
+.build_frontend: &build_frontend
   script:
     - cd frontend
-    - echo "Building frontend Docker image"
-    - docker build -t $FRONTEND_IMAGE .
-    - echo "Tagging frontend Docker image"
-    - docker tag $FRONTEND_IMAGE:latest $ECR_REPO_URL/$FRONTEND_IMAGE:latest
+    - npm install
+    - npm run build
+    - docker build -t $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA
 
-deploy_backend:
+build:
+  stage: build
+  script:
+    - *build_backend
+    - *build_frontend
+
+deploy-stage:
+  when: manual
+  stage: deploy
+  needs: [build]
+  script:
+    - *build_backend
+    - *build_frontend
+    - export TF_VAR_vp_artifactory_token=$ARTIFACTORY_TOKEN
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    - cd deployment
+    - # Add your deployment script for backend and frontend containers in the staging environment
+
+deploy-staging:
   stage: deploy
   script:
-    - echo "Logging in to AWS ECR"
-    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
-    - echo "Pushing backend Docker image to ECR"
-    - docker push $ECR_REPO_URL/$BACKEND_IMAGE:latest
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - *build_backend
+    - *build_frontend
+    - export TF_VAR_vp_artifactory_token=$ARTIFACTORY_TOKEN
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
+    - docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA $ECR_REPO/backend:$CI_COMMIT_SHA
+    - docker tag $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA $ECR_REPO/frontend:$CI_COMMIT_SHA
+    - docker push $ECR_REPO/backend:$CI_COMMIT_SHA
+    - docker push $ECR_REPO/frontend:$CI_COMMIT_SHA
 
-deploy_frontend:
+deploy-prod:
+  when: manual
   stage: deploy
+  only:
+    - main
+  needs: [build]
   script:
-    - echo "Logging in to AWS ECR"
-    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
-    - echo "Pushing frontend Docker image to ECR"
-    - docker push $ECR_REPO_URL/$FRONTEND_IMAGE:latest
+    - *build_backend
+    - *build_frontend
+    - export TF_VAR_vp_artifactory_token=$ARTIFACTORY_TOKEN
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ECR_REGISTRY
+    - docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA $ECR_REPO/backend:$CI_COMMIT_SHA
+    - docker tag $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA $ECR_REPO/frontend:$CI_COMMIT_SHA
+    - docker push $ECR_REPO/backend:$CI_COMMIT_SHA
+    - docker push $ECR_REPO/frontend:$CI_COMMIT_SHA
+    - cd deployment
+    - # Add your deployment script for backend and frontend containers in the production environment
