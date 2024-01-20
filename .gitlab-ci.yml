@@ -38,7 +38,6 @@ build_frontend:
   script:
     - echo "Building frontend Docker image"
     - cd frontend
-    - cp .npmrc /root/.npmrc
     - docker build -t $DOCKER_IMAGE_FRONTEND .
 
 push_to_ecr:
