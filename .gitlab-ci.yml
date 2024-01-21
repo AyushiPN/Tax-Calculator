@@ -46,7 +46,7 @@ push_to_ecr:
   stage: push_to_ecr
   script:
     - echo "Pushing backend Docker image to ECR"
-    - IMAGE_NAME=$DOCKER_IMAGE_BACKEND
+    - IMAGE_NAME=registry.gitlab.com/ayushi0903/tax-calculator/backend
     - IMAGE_TAG=latest
     - IMAGE_ID=$(docker images -q $IMAGE_NAME:$IMAGE_TAG)
     - if [ -z "$IMAGE_ID" ]; then echo "No Docker image found for $IMAGE_NAME:$IMAGE_TAG"; exit 1; fi
