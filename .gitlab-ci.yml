@@ -27,14 +27,14 @@ before_script:
   - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
   - aws configure set region $AWS_DEFAULT_REGION
   - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
- 
+
 build_backend:
   stage: build_backend
   script:
     - echo "Building backend Docker image"
     - cd backend
     - docker build -t $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest .
-    - docker images 
+    - docker images
 
 build_frontend:
   stage: build_frontend
@@ -42,7 +42,6 @@ build_frontend:
     - echo "Building frontend Docker image"
     - cd frontend
     - docker build --build-arg VP_ARTIFACTORY_TOKEN=${VP_ARTIFACTORY_TOKEN} -t $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest .
-
 
 push_to_ecr:
   stage: push_to_ecr
@@ -72,10 +71,13 @@ push_to_ecr:
 deploy_with_terraform:
   stage: deploy_with_terraform
   script:
-    - echo "Deploying with Terraform"
+    - echo "Deploying backend to AWS with Terraform"
     - apk add --no-cache terraform
-    - cd terraform  
+    - cd terraform/backend
     - terraform init
     - terraform apply -auto-approve
-   
 
+    - echo "Deploying frontend to AWS with Terraform"
+    - cd terraform/frontend
+    - terraform init
+    - terraform apply -auto-approve
