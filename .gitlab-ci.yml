@@ -13,6 +13,8 @@ variables:
   DOCKER_IMAGE_FRONTEND: registry.gitlab.com/ayushi0903/tax-calculator/frontend
 
 before_script:
+  - echo "Increasing Docker timeout"
+  - echo '{ "max-concurrent-uploads": 1 }' > ~/.docker/config.json
   - apk add --no-cache git openssh-client
   - eval $(ssh-agent -s)
   - echo "${SSH_PRIVATE_KEY}" | ssh-add -
