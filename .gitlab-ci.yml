@@ -52,7 +52,7 @@ push_to_ecr:
     - docker images
 
     - echo "Pushing backend Docker image to ECR"
-    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
+    - docker push $ECR_REPO:latest
 
     - echo "Building frontend Docker image"
     - cd frontend
@@ -60,7 +60,7 @@ push_to_ecr:
     - docker images
 
     - echo "Pushing frontend Docker image to ECR"
-    - docker push $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
+    - docker push $ECR_REPO:latest
 
    
 
