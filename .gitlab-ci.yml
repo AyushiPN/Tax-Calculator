@@ -47,6 +47,7 @@ push_to_ecr:
   script:
     - echo "Pushing backend Docker image to ECR"
     - docker tag $DOCKER_IMAGE_BACKEND:latest $ECR_REPO/$DOCKER_IMAGE_BACKEND
+    - sleep 5
     - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND
 
     - echo "Pushing frontend Docker image to ECR"
