@@ -7,6 +7,7 @@ stages:
   - build_backend
   - build_frontend
   - push_to_ecr
+  - deploy_with_terraform
 
 variables:
   ECR_REPO: "732656525333.dkr.ecr.eu-west-1.amazonaws.com/tax-calc-proxy"
@@ -58,8 +59,7 @@ push_to_ecr:
     - docker images
 
     - echo "Pushing backend Docker image to ECR"
-    - docker push 732656525333.dkr.ecr.eu-west-1.amazonaws.com/tax-calc-proxy/registry.gitlab.com/ayushi0903/tax-calculator/backend:latest
-
+    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
 
     - echo "Building frontend Docker image"
     - cd frontend
@@ -69,5 +69,13 @@ push_to_ecr:
     - echo "Pushing frontend Docker image to ECR"
     - docker push $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
 
+deploy_with_terraform:
+  stage: deploy_with_terraform
+  script:
+    - echo "Deploying with Terraform"
+    - apk add --no-cache terraform
+    - cd terraform  
+    - terraform init
+    - terraform apply -auto-approve
    
 
