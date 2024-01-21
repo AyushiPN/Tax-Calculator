@@ -73,6 +73,7 @@ deploy_with_terraform:
   stage: deploy_with_terraform
   script:
     - echo "Deploying with Terraform"
+    - apk add --no-cache terraform
     - cd terraform  
     - terraform init
     - terraform apply -auto-approve
