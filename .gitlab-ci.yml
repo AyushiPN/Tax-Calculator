@@ -38,7 +38,8 @@ build_frontend:
   script:
     - echo "Building frontend Docker image"
     - cd frontend
-    - docker build --build-arg VP_ARTIFACTORY_TOKEN=${VP_ARTIFACTORY_TOKEN} -t DOCKER_IMAGE_FRONTEND .
+    - docker build --build-arg VP_ARTIFACTORY_TOKEN=${VP_ARTIFACTORY_TOKEN} -t $DOCKER_IMAGE_FRONTEND .
+
 
 push_to_ecr:
   stage: push_to_ecr
