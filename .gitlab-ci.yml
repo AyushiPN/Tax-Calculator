@@ -13,7 +13,6 @@ variables:
   DOCKER_IMAGE_FRONTEND: registry.gitlab.com/ayushi0903/tax-calculator/frontend
 
 before_script:
-  - set -x
   - apk add --no-cache git openssh-client
   - eval $(ssh-agent -s)
   - echo "${SSH_PRIVATE_KEY}" | ssh-add -
@@ -53,7 +52,7 @@ push_to_ecr:
 
     - echo "Pushing backend Docker image to ECR"
     - docker tag $DOCKER_IMAGE_BACKEND:latest $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
-    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
+    - docker push $ECR_REPO:latest
 
     - echo "Building frontend Docker image"
     - cd frontend
@@ -62,7 +61,7 @@ push_to_ecr:
 
     - echo "Pushing frontend Docker image to ECR"
     - docker tag $DOCKER_IMAGE_FRONTEND:latest $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
-    - docker push $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
+    - docker push $ECR_REPO:latest
 
    
 
