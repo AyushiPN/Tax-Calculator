@@ -31,7 +31,7 @@ build_backend:
   script:
     - echo "Building backend Docker image"
     - cd backend
-    - docker build -t $DOCKER_IMAGE_BACKEND:latest .
+    - docker build -t $DOCKER_IMAGE_BACKEND --file Dockerfile .
 
 build_frontend:
   stage: build_frontend
@@ -45,8 +45,8 @@ push_to_ecr:
   stage: push_to_ecr
   script:
     - echo "Pushing backend Docker image to ECR"
-    - docker tag $DOCKER_IMAGE_BACKEND:latest $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
-    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
+    - docker tag $DOCKER_IMAGE_BACKEND:latest $ECR_REPO/$DOCKER_IMAGE_BACKEND
+    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND
 
     - echo "Pushing frontend Docker image to ECR"
     - docker tag $DOCKER_IMAGE_FRONTEND:latest $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
