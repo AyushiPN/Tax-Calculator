@@ -9,8 +9,8 @@ stages:
   - push_to_ecr
 
 variables:
-  DOCKER_IMAGE_BACKEND: $CI_REGISTRY_IMAGE/backend
-  DOCKER_IMAGE_FRONTEND: $CI_REGISTRY_IMAGE/frontend
+  DOCKER_IMAGE_BACKEND: registry.gitlab.com/ayushi0903/tax-calculator/backend
+  DOCKER_IMAGE_FRONTEND: registry.gitlab.com/ayushi0903/tax-calculator/frontend
 
 before_script:
   - apk add --no-cache git openssh-client
@@ -51,3 +51,7 @@ push_to_ecr:
     - echo "Pushing frontend Docker image to ECR"
     - docker tag $DOCKER_IMAGE_FRONTEND:latest $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
     - docker push $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
+
+dependencies:
+  - build_backend
+  - build_frontend
