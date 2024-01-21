@@ -9,7 +9,7 @@ stages:
   - push_to_ecr
 
 variables:
-  ECR_REPO_URI: "732656525333.dkr.ecr.eu-west-1.amazonaws.com/tax-calc-proxy"
+  ECR_REPO: "732656525333.dkr.ecr.eu-west-1.amazonaws.com/tax-calc-proxy"
   DOCKER_IMAGE_BACKEND: registry.gitlab.com/ayushi0903/tax-calculator/backend
   DOCKER_IMAGE_FRONTEND: registry.gitlab.com/ayushi0903/tax-calculator/frontend
 
@@ -26,6 +26,9 @@ before_script:
   - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
   - aws configure set region $AWS_DEFAULT_REGION
   - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
+  - AWS_AUTH=$(aws ecr get-login-password --region $AWS_DEFAULT_REGION)
+  - echo "AWS Authentication Token: $AWS_AUTH"
+  - echo "$AWS_AUTH" | docker login --username AWS --password-stdin $ECR_REPO_URI
 
 build_backend:
   stage: build_backend
@@ -46,6 +49,13 @@ build_frontend:
 push_to_ecr:
   stage: push_to_ecr
   script:
+    - echo "ECR Repository URI: $ECR_REPO_URI"
+    - echo "Docker Image Backend: $DOCKER_IMAGE_BACKEND"
+    - echo "Docker Image Frontend: $DOCKER_IMAGE_FRONTEND"
+    - echo "AWS CLI Version:"
+    - aws --version
+
+
     - echo "Building backend Docker image"
     - cd backend
     - docker build -t $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest .
