@@ -46,10 +46,10 @@ build_frontend:
 push_to_ecr:
   stage: push_to_ecr
   script:
-    - echo "ECR Repository URI: $ECR_REPO_URI"
-    - echo "Docker Image Backend: $DOCKER_IMAGE_BACKEND"
-    - echo "Docker Image Frontend: $DOCKER_IMAGE_FRONTEND"
-    - echo "AWS CLI Version:"
+    - echo "ECR Repository URI:" $ECR_REPO_URI
+    - echo "Docker Image Backend:" $DOCKER_IMAGE_BACKEND
+    - echo "Docker Image Frontend:" $DOCKER_IMAGE_FRONTEND
+    - echo "AWS CLI Version:"  
     - aws --version
 
     - echo "Building backend Docker image"
