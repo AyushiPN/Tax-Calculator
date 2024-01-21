@@ -46,10 +46,12 @@ push_to_ecr:
   stage: push_to_ecr
   script:
     - echo "Pushing backend Docker image to ECR"
-    - IMAGE_ID=$(docker images -q $DOCKER_IMAGE_BACKEND)
-    - if [ -z "$IMAGE_ID" ]; then echo "No Docker image found for $DOCKER_IMAGE_BACKEND"; exit 1; fi
-    - docker tag $IMAGE_ID $ECR_REPO/$DOCKER_IMAGE_BACKEND
-    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND
+    - IMAGE_NAME=$DOCKER_IMAGE_BACKEND
+    - IMAGE_TAG=latest
+    - IMAGE_ID=$(docker images -q $IMAGE_NAME:$IMAGE_TAG)
+    - if [ -z "$IMAGE_ID" ]; then echo "No Docker image found for $IMAGE_NAME:$IMAGE_TAG"; exit 1; fi
+    - docker tag $IMAGE_ID $ECR_REPO/$IMAGE_NAME:$IMAGE_TAG
+    - docker push $ECR_REPO/$IMAGE_NAME:$IMAGE_TAG
 
     - echo "Pushing frontend Docker image to ECR"
     - docker tag $DOCKER_IMAGE_FRONTEND:latest $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
