@@ -45,13 +45,14 @@ build_frontend:
 push_to_ecr:
   stage: push_to_ecr
   script:
+    - echo "Building backend Docker image"
+    - cd backend
+    - docker build -t $DOCKER_IMAGE_BACKEND --file Dockerfile .
+    - docker images
+
     - echo "Pushing backend Docker image to ECR"
-    - IMAGE_NAME=registry.gitlab.com/ayushi0903/tax-calculator/backend
-    - IMAGE_TAG=latest
-    - IMAGE_ID=$(docker images -q $IMAGE_NAME:$IMAGE_TAG)
-    - if [ -z "$IMAGE_ID" ]; then echo "No Docker image found for $IMAGE_NAME:$IMAGE_TAG"; exit 1; fi
-    - docker tag $IMAGE_ID $ECR_REPO/$IMAGE_NAME:$IMAGE_TAG
-    - docker push $ECR_REPO/$IMAGE_NAME:$IMAGE_TAG
+    - docker tag $DOCKER_IMAGE_BACKEND:latest $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
+    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
 
     - echo "Pushing frontend Docker image to ECR"
     - docker tag $DOCKER_IMAGE_FRONTEND:latest $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
