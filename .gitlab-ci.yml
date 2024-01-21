@@ -13,8 +13,6 @@ variables:
   DOCKER_IMAGE_FRONTEND: registry.gitlab.com/ayushi0903/tax-calculator/frontend
 
 before_script:
-  - echo "Increasing Docker timeout"
-  - echo '{ "max-concurrent-uploads": 1 }' > ~/.docker/config.json
   - apk add --no-cache git openssh-client
   - eval $(ssh-agent -s)
   - echo "${SSH_PRIVATE_KEY}" | ssh-add -
@@ -54,7 +52,8 @@ push_to_ecr:
 
     - echo "Pushing backend Docker image to ECR"
     - docker tag $DOCKER_IMAGE_BACKEND:latest $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
-    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
+    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest || sleep 5 && docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
 
     - echo "Building frontend Docker image"
     - cd frontend
