@@ -52,6 +52,3 @@ push_to_ecr:
     - docker tag $DOCKER_IMAGE_FRONTEND:latest $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
     - docker push $ECR_REPO/$DOCKER_IMAGE_FRONTEND:latest
 
-dependencies:
-  - build_backend
-  - build_frontend
