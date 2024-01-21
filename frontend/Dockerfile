@@ -1,14 +1,16 @@
 FROM node:18-alpine
+
 ARG VP_ARTIFACTORY_TOKEN
 
 WORKDIR /usr/src
 
 COPY package*.json ./
+COPY .npmrc ./
 
-# Set npm registry and authentication token
-RUN echo "//registry.npmjs.org/:_authToken=${VP_ARTIFACTORY_TOKEN}" > .npmrc
+RUN echo "//registry.npmjs.org/:_authToken=${VP_ARTIFACTORY_TOKEN}" > .npmrc && \
+    npm install
 
-RUN npm install
+ENV VP_ARTIFACTORY_TOKEN=$VP_ARTIFACTORY_TOKEN
 
 EXPOSE 5173
 
