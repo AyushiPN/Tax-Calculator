@@ -13,6 +13,7 @@ variables:
   DOCKER_IMAGE_FRONTEND: registry.gitlab.com/ayushi0903/tax-calculator/frontend
 
 before_script:
+  - set -x
   - apk add --no-cache git openssh-client
   - eval $(ssh-agent -s)
   - echo "${SSH_PRIVATE_KEY}" | ssh-add -
