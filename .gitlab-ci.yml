@@ -56,7 +56,8 @@ push_to_ecr:
     - docker images
 
     - echo "Pushing backend Docker image to ECR"
-    - docker push $ECR_REPO/$DOCKER_IMAGE_BACKEND:latest
+    - docker push 732656525333.dkr.ecr.eu-west-1.amazonaws.com/tax-calc-proxy/registry.gitlab.com/ayushi0903/tax-calculator/backend:latest
+
 
     - echo "Building frontend Docker image"
     - cd frontend
