@@ -6,8 +6,8 @@ data "aws_ecr_repository" "tax_calc_proxy" {
   name = "tax-calc-proxy"  # Existing ECR repository name
 }
 
-resource "aws_iam_role" "ecs_execution_role" {
-  name = "ecs-execution-role"
+resource "aws_iam_role" "backend_execution_role" {
+  name = "backend-execution-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
