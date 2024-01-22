@@ -53,8 +53,8 @@ push_frontend_to_ecr:
     - echo "Pushing frontend Docker image to ECR"
     - docker push $ECR_REPO
 
-deploy_with_terraform:
-  stage: deploy_with_terraform
+deploy_backend_with_terraform:
+  stage: deploy_backend_with_terraform
   script:
     - echo "Deploying backend to AWS with Terraform"
     - apk add --no-cache terraform
@@ -62,7 +62,11 @@ deploy_with_terraform:
     - terraform init
     - terraform apply -auto-approve
 
+deploy_frontend_with_terraform:
+  stage: deploy_frontend_with_terraform
+  script:
     - echo "Deploying frontend to AWS with Terraform"
+    - apk add --no-cache terraform
     - cd terraform/frontend
     - terraform init
     - terraform apply -auto-approve
