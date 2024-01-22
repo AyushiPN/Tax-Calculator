@@ -67,7 +67,7 @@ push_frontend_to_ecr:
     - docker images
 
     - echo "Pushing frontend Docker image to ECR"
-    - docker push $ECR_REPO:latest
+    - docker push $ECR_REPO
 
 deploy_with_terraform:
   stage: deploy_with_terraform
