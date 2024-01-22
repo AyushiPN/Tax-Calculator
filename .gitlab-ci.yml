@@ -63,7 +63,6 @@ deploy_backend_with_terraform:
     - terraform --version
 
     - echo "Deploying backend to AWS with Terraform"
-    - apk add terraform
     - cd terraform/backend
     - terraform init
     - terraform apply -auto-approve
@@ -77,7 +76,6 @@ deploy_frontend_with_terraform:
     - terraform --version
     
     - echo "Deploying frontend to AWS with Terraform"
-    - apk add terraform
     - cd terraform/frontend
     - terraform init
     - terraform apply -auto-approve
