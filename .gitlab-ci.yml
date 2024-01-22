@@ -15,7 +15,6 @@ variables:
   DOCKER_IMAGE_FRONTEND: "frontend"
 
 before_script:
-  - apk add terraform
   - apk add --no-cache git openssh-client
   - eval $(ssh-agent -s)
   - echo "${SSH_PRIVATE_KEY}" | ssh-add -
@@ -59,6 +58,7 @@ deploy_backend_with_terraform:
   stage: deploy_backend_with_terraform
   script:
     - echo "Deploying backend to AWS with Terraform"
+    - apk add terraform
     - cd terraform/backend
     - terraform init
     - terraform apply -auto-approve
@@ -67,6 +67,7 @@ deploy_frontend_with_terraform:
   stage: deploy_frontend_with_terraform
   script:
     - echo "Deploying frontend to AWS with Terraform"
+    - apk add terraform
     - cd terraform/frontend
     - terraform init
     - terraform apply -auto-approve
