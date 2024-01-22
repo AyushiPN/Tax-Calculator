@@ -6,7 +6,8 @@ services:
 stages:
   - push_backend_to_ecr
   - push_frontend_to_ecr
-  - deploy_with_terraform
+  - deploy_backend_with_terraform
+  - deploy_frontend_with_terraform
 
 variables:
   ECR_REPO: "732656525333.dkr.ecr.eu-west-1.amazonaws.com/tax-calc-proxy"
