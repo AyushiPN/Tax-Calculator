@@ -51,5 +51,6 @@ resource "aws_ecs_service" "frontend_service" {
   network_configuration {
     subnets         = ["subnet-0003d5ada12f964ca"]
     security_groups = ["sg-0737d50b02c59bbad"]
+    assign_public_ip = "ENABLED"
   }
 }

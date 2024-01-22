@@ -8,6 +8,7 @@ data "aws_ecr_repository" "tax_calc_proxy" {
 
 resource "aws_iam_role" "backend_execution_role" {
   name = "backend-execution-role"
+  
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -51,5 +52,6 @@ resource "aws_ecs_service" "backend_service" {
   network_configuration {
     subnets         = ["subnet-0003d5ada12f964ca"]
     security_groups = ["sg-0737d50b02c59bbad"]
+    assign_public_ip = "ENABLED"
   }
 }
