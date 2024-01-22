@@ -34,7 +34,7 @@ build_backend:
   script:
     - echo "Building backend Docker image"
     - cd backend
-    - docker build -t $DOCKER_IMAGE_BACKEND .
+    - docker build -t $DOCKER_IMAGE_BACKEND:back .
     - docker images
 
 build_frontend:
@@ -42,19 +42,19 @@ build_frontend:
   script:
     - echo "Building frontend Docker image"
     - cd frontend
-    - docker build --build-arg VP_ARTIFACTORY_TOKEN=${VP_ARTIFACTORY_TOKEN} -t $DOCKER_IMAGE_FRONTEND .
+    - docker build --build-arg VP_ARTIFACTORY_TOKEN=${VP_ARTIFACTORY_TOKEN} -t $DOCKER_IMAGE_FRONTEND:front .
 
 push_backend_to_ecr:
   stage: push_backend_to_ecr
   script:
     - echo "Building backend Docker image"
     - cd backend
-    - docker build -t $DOCKER_IMAGE_BACKEND .
-    - docker tag $DOCKER_IMAGE_BACKEND $ECR_REPO
+    - docker build -t $DOCKER_IMAGE_BACKEND:back .
+    - docker tag $DOCKER_IMAGE_BACKEND:back $ECR_REPO
     - docker images
 
     - echo "Pushing backend Docker image to ECR"
-    - docker push $ECR_REPO
+    - docker push $ECR_REPO:back
 
 
 push_frontend_to_ecr:
@@ -62,12 +62,12 @@ push_frontend_to_ecr:
   script:
     - echo "Building frontend Docker image"
     - cd frontend
-    - docker build --build-arg VP_ARTIFACTORY_TOKEN=${VP_ARTIFACTORY_TOKEN} -t $DOCKER_IMAGE_FRONTEND .
-    - docker tag $DOCKER_IMAGE_FRONTEND $ECR_REPO
+    - docker build --build-arg VP_ARTIFACTORY_TOKEN=${VP_ARTIFACTORY_TOKEN} -t $DOCKER_IMAGE_FRONTEND:front .
+    - docker tag $DOCKER_IMAGE_FRONTEND:front $ECR_REPO
     - docker images
 
     - echo "Pushing frontend Docker image to ECR"
-    - docker push $ECR_REPO
+    - docker push $ECR_REPO:front
 
 deploy_with_terraform:
   stage: deploy_with_terraform
