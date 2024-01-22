@@ -6,7 +6,8 @@ services:
 stages:
   - push_backend_to_ecr
   - push_frontend_to_ecr
-  - deploy_with_terraform
+  - deploy_backend_with_terraform
+  - deploy_frontend_with_terraform
 
 variables:
   ECR_REPO: "732656525333.dkr.ecr.eu-west-1.amazonaws.com/tax-calc-proxy"
@@ -56,8 +57,12 @@ push_frontend_to_ecr:
 deploy_backend_with_terraform:
   stage: deploy_backend_with_terraform
   script:
+    - echo "Downloading Terraform"
+    - wget https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip
+    - unzip terraform_0.15.5_linux_amd64.zip -d /usr/local/bin/
+    - terraform --version
+
     - echo "Deploying backend to AWS with Terraform"
-    - apk add --no-cache terraform
     - cd terraform/backend
     - terraform init
     - terraform apply -auto-approve
@@ -65,8 +70,12 @@ deploy_backend_with_terraform:
 deploy_frontend_with_terraform:
   stage: deploy_frontend_with_terraform
   script:
+    - echo "Downloading Terraform"
+    - wget https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip
+    - unzip terraform_0.15.5_linux_amd64.zip -d /usr/local/bin/
+    - terraform --version
+    
     - echo "Deploying frontend to AWS with Terraform"
-    - apk add --no-cache terraform
     - cd terraform/frontend
     - terraform init
     - terraform apply -auto-approve
