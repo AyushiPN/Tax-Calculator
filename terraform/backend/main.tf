@@ -28,7 +28,7 @@ resource "aws_ecs_task_definition" "backend_task" {
   family                   = "backend-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = aws_iam_role.ecs_execution_role.arn  # Specify execution role ARN
+  execution_role_arn       = aws_iam_role.backend_execution_role.arn  # Specify execution role ARN
 
   cpu     = "256"   # Set the desired CPU units
   memory  = "512"   # Set the desired memory in MiB
