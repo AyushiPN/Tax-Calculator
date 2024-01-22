@@ -15,6 +15,9 @@ resource "aws_ecs_task_definition" "frontend_task" {
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
 
+  cpu     = "256"   
+  memory  = "512"
+
   container_definitions = jsonencode([{
     name      = "frontend-container",
     image     = "${data.aws_ecr_repository.tax_calc_proxy.repository_url}:latest",
