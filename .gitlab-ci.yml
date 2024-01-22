@@ -6,7 +6,8 @@ services:
 stages:
   - build_backend
   - build_frontend
-  - push_to_ecr
+  - push_backend_to_ecr
+  - push_frontend_to_ecr
   - deploy_with_terraform
 
 variables:
