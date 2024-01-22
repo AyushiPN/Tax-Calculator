@@ -57,6 +57,11 @@ push_frontend_to_ecr:
 deploy_backend_with_terraform:
   stage: deploy_backend_with_terraform
   script:
+    - echo "Downloading Terraform"
+    - wget https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip
+    - unzip terraform_0.15.5_linux_amd64.zip -d /usr/local/bin/
+    - terraform --version
+
     - echo "Deploying backend to AWS with Terraform"
     - apk add terraform
     - cd terraform/backend
@@ -66,6 +71,11 @@ deploy_backend_with_terraform:
 deploy_frontend_with_terraform:
   stage: deploy_frontend_with_terraform
   script:
+    - echo "Downloading Terraform"
+    - wget https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip
+    - unzip terraform_0.15.5_linux_amd64.zip -d /usr/local/bin/
+    - terraform --version
+    
     - echo "Deploying frontend to AWS with Terraform"
     - apk add terraform
     - cd terraform/frontend
