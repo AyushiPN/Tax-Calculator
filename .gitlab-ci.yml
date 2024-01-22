@@ -4,8 +4,6 @@ services:
   - docker:dind
 
 stages:
-  - build_backend
-  - build_frontend
   - push_backend_to_ecr
   - push_frontend_to_ecr
   - deploy_with_terraform
@@ -29,20 +27,6 @@ before_script:
   - aws configure set region $AWS_DEFAULT_REGION
   - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO
 
-build_backend:
-  stage: build_backend
-  script:
-    - echo "Building backend Docker image"
-    - cd backend
-    - docker build -t $DOCKER_IMAGE_BACKEND .
-    - docker images
-
-build_frontend:
-  stage: build_frontend
-  script:
-    - echo "Building frontend Docker image"
-    - cd frontend
-    - docker build --build-arg VP_ARTIFACTORY_TOKEN=${VP_ARTIFACTORY_TOKEN} -t $DOCKER_IMAGE_FRONTEND .
 
 push_backend_to_ecr:
   stage: push_backend_to_ecr
