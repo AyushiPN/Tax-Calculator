@@ -11,7 +11,7 @@ stages:
 
 variables:
   ECR_REPO: "732656525333.dkr.ecr.eu-west-1.amazonaws.com/tax-calc-proxy"
-  DOCKER_IMAGE_BACKEND: "registry.gitlab.com/ayushi0903/tax-calculator/backend"
+  DOCKER_IMAGE_BACKEND: "backend"
   DOCKER_IMAGE_FRONTEND: "registry.gitlab.com/ayushi0903/tax-calculator/frontend"
 
 before_script:
@@ -33,7 +33,7 @@ build_backend:
   script:
     - echo "Building backend Docker image"
     - cd backend
-    - docker build -t $DOCKER_IMAGE_BACKEND:latest .
+    - docker build -t $DOCKER_IMAGE_BACKEND .
     - docker images
 
 build_frontend:
@@ -54,11 +54,13 @@ push_to_ecr:
 
     - echo "Building backend Docker image"
     - cd backend
-    - docker build -t $DOCKER_IMAGE_BACKEND:latest .
+    - docker build -t $DOCKER_IMAGE_BACKEND .
     - docker images
 
+    - docker tag $DOCKER_IMAGE_BACKEND $ECR_REPO
+
     - echo "Pushing backend Docker image to ECR"
-    - docker push latest
+    - docker push $ECR_REPO
 
     - echo "Building frontend Docker image"
     - cd frontend
