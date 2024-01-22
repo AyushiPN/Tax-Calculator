@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 data "aws_ecr_repository" "tax_calc_proxy" {
-  name = "tax-calc-proxy"
+  name = "tax-calc-proxy"  # Existing ECR repository name
 }
 
 resource "aws_ecs_cluster" "frontend_cluster" {
