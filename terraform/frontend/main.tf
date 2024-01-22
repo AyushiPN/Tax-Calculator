@@ -14,6 +14,7 @@ resource "aws_ecs_task_definition" "frontend_task" {
   family                   = "frontend-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
+   execution_role_arn       = "arn:aws:iam::732656525333:user/tax-calc"
 
   cpu     = "256"   
   memory  = "512"
