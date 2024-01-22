@@ -43,6 +43,14 @@ resource "aws_ecs_task_definition" "backend_task" {
   }])
 }
 
+resource "aws_lb_target_group" "backend_target_group" {
+  name        = "backend-target-group"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = "vpc-02f68a4241ae8c12e"
+  target_type = "ip"  # Assuming your tasks have IPs
+}
+
 resource "aws_ecs_service" "backend_service" {
   name            = "backend-service"
   cluster         = aws_ecs_cluster.backend_cluster.id
@@ -52,6 +60,12 @@ resource "aws_ecs_service" "backend_service" {
   network_configuration {
     subnets         = ["subnet-0003d5ada12f964ca"]
     security_groups = ["sg-0737d50b02c59bbad"]
-    assign_public_ip = "true"
+    # assign_public_ip = "true"
+  }
+
+    load_balancer {
+    target_group_arn = aws_lb_target_group.backend_target_group.arn
+    container_name   = "backend-container"
+    container_port   = 80  # Assuming your container listens on port 80
   }
 }

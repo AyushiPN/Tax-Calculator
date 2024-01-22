@@ -42,6 +42,14 @@ resource "aws_ecs_task_definition" "frontend_task" {
   }])
 }
 
+resource "aws_lb_target_group" "frontend_target_group" {
+  name        = "frontend-target-group"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = "vpc-02f68a4241ae8c12e"
+  target_type = "ip"  # Assuming your tasks have IPs
+}
+
 resource "aws_ecs_service" "frontend_service" {
   name            = "frontend-service"
   cluster         = aws_ecs_cluster.frontend_cluster.id
@@ -52,5 +60,11 @@ resource "aws_ecs_service" "frontend_service" {
     subnets         = ["subnet-0003d5ada12f964ca"]
     security_groups = ["sg-0737d50b02c59bbad"]
     assign_public_ip = "true"
+  }
+
+    load_balancer {
+    target_group_arn = aws_lb_target_group.frontend_target_group.arn
+    container_name   = "frontend-container"
+    container_port   = 80  # Assuming your container listens on port 80
   }
 }
