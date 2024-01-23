@@ -162,3 +162,8 @@ resource "aws_ecs_service" "backend_service" {
     container_port   = 3000
   }
 }
+
+resource "aws_lb_target_group_attachment" "backend_lb_target_group" {
+  target_group_arn = aws_lb_target_group.backend_target_group.arn
+  target_id        = aws_ecs_service.backend_service.name
+}
