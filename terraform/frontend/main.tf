@@ -30,11 +30,11 @@ resource "aws_lb" "load_balancer" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["sg-0737d50b02c59bbad"]
-  subnets            = ["subnet-0003d5ada12f964ca"]
+  subnets            = ["subnet-0003d5ada12f964ca", "subnet-0f03be6d1bd126130"]  # Specify your subnets here in different AZs
 }
 
 resource "aws_lb_target_group" "frontend_target_group" {
-  name     = "frontend_target_group"
+  name     = "frontend-target-group"
   port     = 5173
   protocol = "HTTP"
   vpc_id   = "vpc-02f68a4241ae8c12e"
@@ -58,8 +58,8 @@ resource "aws_ecs_task_definition" "frontend_task" {
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.frontend_execution_role.arn
 
-  cpu     = "256"   # Set the desired CPU units
-  memory  = "512"   # Set the desired memory in MiB
+  cpu     = "256"
+  memory  = "512"
 
   container_definitions = jsonencode([{
     name      = "frontend-container",
@@ -68,9 +68,9 @@ resource "aws_ecs_task_definition" "frontend_task" {
     memory    = 512,
     essential = true,
     portMappings = [{
-      containerPort = 5173
-      hostPort      = 5173
-    }]
+      containerPort = 5173,
+      hostPort      = 5173,
+    }],
   }])
 }
 
@@ -81,7 +81,7 @@ resource "aws_ecs_service" "frontend_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = ["subnet-0003d5ada12f964ca"]
+    subnets         =  ["subnet-0003d5ada12f964ca", "subnet-0f03be6d1bd126130"]  # Specify your subnets here in different AZs
     security_groups = ["sg-0737d50b02c59bbad"]
     assign_public_ip = true
   }
