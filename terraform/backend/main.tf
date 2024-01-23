@@ -21,7 +21,6 @@ resource "aws_iam_role" "backend_execution_role" {
   })
 }
 
-
 resource "aws_ecs_cluster" "backend_cluster" {
   name = "backend_ecs-cluster"
 }
@@ -30,7 +29,7 @@ resource "aws_ecs_task_definition" "backend_task" {
   family                   = "backend-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = aws_iam_role.backend_execution_role.arn  # Replace with your execution role ARN
+  execution_role_arn       = aws_iam_role.backend_execution_role.arn
 
   cpu     = "256"
   memory  = "512"
@@ -55,12 +54,37 @@ resource "aws_ecs_service" "backend_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets = ["subnet-0003d5ada12f964ca"]  # No subnets needed for Fargate without VPC
-    security_groups = ["sg-0737d50b02c59bbad"]  # No security groups needed for Fargate without VPC
+    subnets = ["subnet-0003d5ada12f964ca"]
+    security_groups = ["sg-0737d50b02c59bbad"]
     assign_public_ip = true
+  }
+
+  # Expose the service through an Application Load Balancer
+  load_balancer {
+    target_group_arn = aws_lb_target_group.backend_target_group.arn
+    container_name   = "backend-container"
+    container_port   = 3000
   }
 }
 
-output "public_ip" {
-  value = aws_ecs_service.backend_service.eni_ids[0]  # Assuming there is only one ENI, adjust accordingly
+resource "aws_lb" "backend_lb" {
+  name               = "backend-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = ["sg-0737d50b02c59bbad"]
+  subnets            = ["subnet-0003d5ada12f964ca"]
+
+  enable_deletion_protection = false
+}
+
+resource "aws_lb_target_group" "backend_target_group" {
+  name     = "backend-target-group"
+  port     = 3000
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.backend_vpc.id
+  target_type = "ip"
+}
+
+output "backend_lb_dns" {
+  value = aws_lb.backend_lb.dns_name
 }
