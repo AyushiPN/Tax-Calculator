@@ -7,7 +7,7 @@ data "aws_ecr_repository" "tax_calc_proxy" {
 }
 
 resource "aws_iam_role" "backend_execution_role" {
-  name = "backend_execution-role"
+  name = "bac_execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -50,7 +50,7 @@ resource "aws_ecs_task_definition" "backend_task" {
 
 resource "aws_ecs_service" "backend_service" {
   name            = "backend-service"
-  cluster         = aws_ecs_cluster.cluster.id
+  cluster         = aws_ecs_cluster.backend_cluster.id
   task_definition = aws_ecs_task_definition.backend_task.arn
   launch_type     = "FARGATE"
 
