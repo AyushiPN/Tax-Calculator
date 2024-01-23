@@ -61,6 +61,21 @@ resource "aws_route_table_association" "tax_calc_vpc_2" {
   route_table_id = aws_route_table.public.id
 }
 
+resource "aws_security_group" "tax_calc_security_group" {
+  name        = "tax-calc-sg"
+  description = "Security group for tax-calc VPC"
+  vpc_id      = aws_vpc.tax_calc_vpc.id
+  ingress {
+    from_port = 3000
+    to_port   = 3000
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+}
+
+
+
 resource "aws_iam_role" "backend_execution_role" {
   name = "backend_execution-role"
 
@@ -84,7 +99,7 @@ resource "aws_lb" "load_balancer" {
   name               = "ecs-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = ["sg-0737d50b02c59bbad"]
+  security_groups    = [aws_security_group.tax_calc_security_group.id]
   subnets            = [aws_subnet.tax_calc_vpc_1.id, aws_subnet.tax_calc_vpc_2.id]  # Specify your subnets here in different AZs
 }
 
@@ -137,7 +152,7 @@ resource "aws_ecs_service" "backend_service" {
 
   network_configuration {
     subnets         =  [aws_subnet.tax_calc_vpc_1.id, aws_subnet.tax_calc_vpc_2.id]   # Specify your subnets here in different AZs
-    security_groups = ["sg-0737d50b02c59bbad"]
+    security_groups = [aws_security_group.tax_calc_security_group.id]
     assign_public_ip = true
   }
 
