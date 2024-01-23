@@ -16,7 +16,19 @@ resource "aws_vpc" "tax_calc_vpc" {
   }
 }
 
-# Create Subnets in Different Availability Zones for backend
+resource "aws_internet_gateway" "tax_calc_gateway" {
+  vpc_id = aws_vpc.tax_calc_vpc.id
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.tax_calc_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.tax_calc_gateway.id
+  }
+}
+
 resource "aws_subnet" "tax_calc_vpc_1" {
   vpc_id                  = aws_vpc.tax_calc_vpc.id
   cidr_block              = "10.1.1.0/24"
@@ -26,6 +38,11 @@ resource "aws_subnet" "tax_calc_vpc_1" {
   tags = {
     Name = "tax-calc-1"
   }
+}
+
+resource "aws_route_table_association" "tax_calc_vpc_1" {
+  subnet_id      = aws_subnet.tax_calc_vpc_1.id
+  route_table_id = aws_route_table.public.id
 }
 
 resource "aws_subnet" "tax_calc_vpc_2" {
@@ -39,6 +56,10 @@ resource "aws_subnet" "tax_calc_vpc_2" {
   }
 }
 
+resource "aws_route_table_association" "tax_calc_vpc_2" {
+  subnet_id      = aws_subnet.tax_calc_vpc_2.id
+  route_table_id = aws_route_table.public.id
+}
 
 resource "aws_iam_role" "backend_execution_role" {
   name = "backend_execution-role"
