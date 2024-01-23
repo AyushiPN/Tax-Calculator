@@ -34,10 +34,11 @@ resource "aws_lb" "load_balancer" {
 }
 
 resource "aws_lb_target_group" "backend_target_group" {
-  name     = "backend-target-group"
+ name     = "backend-target-group"
   port     = 3000
   protocol = "HTTP"
   vpc_id   = "vpc-02f68a4241ae8c12e"
+  target_type = "ip"
 }
 
 resource "aws_lb_listener" "backend_listener" {
