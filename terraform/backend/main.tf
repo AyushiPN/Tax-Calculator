@@ -6,6 +6,39 @@ data "aws_ecr_repository" "tax_calc_proxy" {
   name = "tax-calc-proxy"  # Existing ECR repository name
 }
 
+resource "aws_vpc" "backend_vpc" {
+  cidr_block = "10.0.0.0/16"
+  enable_dns_support = true
+  enable_dns_hostnames = true
+
+  tags = {
+    Name = "backend-vpc"
+  }
+}
+
+# Create Subnets in Different Availability Zones for Backend
+resource "aws_subnet" "backend_subnet_1" {
+  vpc_id                  = aws_vpc.backend_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "eu-west-1a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "backend-subnet-1"
+  }
+}
+
+resource "aws_subnet" "backend_subnet_2" {
+  vpc_id                  = aws_vpc.backend_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "eu-west-1b"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "backend-subnet-2"
+  }
+}
+
 resource "aws_iam_role" "backend_execution_role" {
   name = "backend_execution-role"
 
@@ -30,14 +63,14 @@ resource "aws_lb" "load_balancer" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["sg-0737d50b02c59bbad"]
-  subnets            = ["subnet-0003d5ada12f964ca", "subnet-0f03be6d1bd126130"]  # Specify your subnets here in different AZs
+  subnets            = ["backend-subnet-1", "backend-subnet-2"]  # Specify your subnets here in different AZs
 }
 
 resource "aws_lb_target_group" "backend_target_group" {
   name     = "backend-target-group"
   port     = 3000
   protocol = "HTTP"
-  vpc_id   = "vpc-02f68a4241ae8c12e"
+  vpc_id   = aws_vpc.backend_vpc.id
   target_type = "ip"
 }
 
