@@ -6,6 +6,22 @@ data "aws_ecr_repository" "tax_calc_proxy" {
   name = "tax-calc-proxy"  # Existing ECR repository name
 }
 
+resource "aws_iam_role" "backend_execution_role" {
+  name = "backend_execution-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com",
+      },
+    }],
+  })
+}
+
+
 resource "aws_ecs_cluster" "backend_cluster" {
   name = "backend_ecs-cluster"
 }
@@ -14,7 +30,7 @@ resource "aws_ecs_task_definition" "backend_task" {
   family                   = "backend-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = "your_execution_role_arn"  # Replace with your execution role ARN
+  execution_role_arn       = aws_iam_role.backend_execution_role.arn  # Replace with your execution role ARN
 
   cpu     = "256"
   memory  = "512"
