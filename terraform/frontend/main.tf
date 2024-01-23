@@ -64,7 +64,7 @@ resource "aws_lb" "load_balancer" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["sg-0737d50b02c59bbad"]
-  subnets            = ["frontend-subnet-1", "frontend-subnet-2"]  # Specify your subnets here in different AZs
+  subnets            = [aws_subnet.frontend_subnet_1.id, aws_subnet.frontend_subnet_2.id]  # Specify your subnets here in different AZs
 }
 
 resource "aws_lb_target_group" "frontend_target_group" {
@@ -115,7 +115,7 @@ resource "aws_ecs_service" "frontend_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         =  ["subnet-0003d5ada12f964ca", "subnet-0f03be6d1bd126130"]  # Specify your subnets here in different AZs
+    subnets         =  [aws_subnet.frontend_subnet_1.id, aws_subnet.frontend_subnet_2.id]   # Specify your subnets here in different AZs
     security_groups = ["sg-0737d50b02c59bbad"]
     assign_public_ip = true
   }
