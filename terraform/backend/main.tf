@@ -6,8 +6,8 @@ data "aws_ecr_repository" "tax_calc_proxy" {
   name = "tax-calc-proxy"  # Existing ECR repository name
 }
 
-resource "aws_iam_role" "execution_role" {
-  name = "execution-role"
+resource "aws_iam_role" "backend_execution_role" {
+  name = "backend_execution_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -56,7 +56,7 @@ resource "aws_ecs_task_definition" "backend_task" {
   family                   = "backend-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = aws_iam_role.execution_role.arn
+  execution_role_arn       = aws_iam_role.backend_execution_role.arn
 
   cpu     = "256"   # Set the desired CPU units
   memory  = "512"   # Set the desired memory in MiB
