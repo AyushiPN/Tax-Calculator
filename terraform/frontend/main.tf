@@ -6,36 +6,36 @@ data "aws_ecr_repository" "tax_calc_proxy" {
   name = "tax-calc-proxy"  # Existing ECR repository name
 }
 
-resource "aws_vpc" "frontend_vpc" {
+resource "aws_vpc" "tax_calc_vpc" {
   cidr_block = "10.1.0.0/16"
   enable_dns_support = true
   enable_dns_hostnames = true
 
   tags = {
-    Name = "frontend-vpc"
+    Name = "tax_calc_vpc"
   }
 }
 
 # Create Subnets in Different Availability Zones for Frontend
-resource "aws_subnet" "frontend_subnet_1" {
-  vpc_id                  = aws_vpc.frontend_vpc.id
+resource "aws_subnet" "tax_calc_vpc_1" {
+  vpc_id                  = aws_vpc.tax_calc_vpc.id
   cidr_block              = "10.1.1.0/24"
   availability_zone       = "eu-west-1a"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "frontend-subnet-1"
+    Name = "tax-calc-1"
   }
 }
 
-resource "aws_subnet" "frontend_subnet_2" {
-  vpc_id                  = aws_vpc.frontend_vpc.id
+resource "aws_subnet" "tax_calc_vpc_2" {
+  vpc_id                  = aws_vpc.tax_calc_vpc.id
   cidr_block              = "10.1.2.0/24"
   availability_zone       = "eu-west-1b"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "frontend-subnet-2"
+    Name = "tax-calc-2"
   }
 }
 
@@ -64,14 +64,14 @@ resource "aws_lb" "load_balancer" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["sg-0737d50b02c59bbad"]
-  subnets            = [aws_subnet.frontend_subnet_1.id, aws_subnet.frontend_subnet_2.id]  # Specify your subnets here in different AZs
+  subnets            = [aws_subnet.tax_calc_vpc_1.id, aws_subnet.tax_calc_vpc_2.id]  # Specify your subnets here in different AZs
 }
 
 resource "aws_lb_target_group" "frontend_target_group" {
   name     = "frontend-target-group"
   port     = 5173
   protocol = "HTTP"
-  vpc_id   = aws_vpc.frontend_vpc.id
+  vpc_id   = aws_vpc.tax_calc_vpc.id
   target_type = "ip"
 }
 
@@ -115,7 +115,7 @@ resource "aws_ecs_service" "frontend_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         =  [aws_subnet.frontend_subnet_1.id, aws_subnet.frontend_subnet_2.id]   # Specify your subnets here in different AZs
+    subnets         =  [aws_subnet.tax_calc_vpc_1.id, aws_subnet.tax_calc_vpc_2.id]   # Specify your subnets here in different AZs
     security_groups = ["sg-0737d50b02c59bbad"]
     assign_public_ip = true
   }
