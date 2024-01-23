@@ -81,7 +81,7 @@ resource "aws_lb_target_group" "backend_target_group" {
   name     = "backend-target-group"
   port     = 3000
   protocol = "HTTP"
-  vpc_id   = aws_vpc.backend_vpc.id
+  vpc_id   = "vpc-02f68a4241ae8c12e"
   target_type = "ip"
 }
 
